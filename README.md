@@ -5,44 +5,45 @@ https://www.aclweb.org/anthology/2020.emnlp-main.171/
 
 ## Requirements
 
-* The file **requirements.txt** contains required libraries.
+* The file **requirements.txt** contains required libraries. You can install them with:
+
+```
+pip install -r requirements.txt
+```
 
 * You also need to install [pytorch](https://pytorch.org/).
 
 * We use [pytorch-struct](https://github.com/harvardnlp/pytorch-struct) for the experiments with structured latent variables.
 
-* We use SparseMAP in the experiments with structured latent variables. 
-*Instructions how to install the necessary dependencies will be added soon.*
+* We use SparseMAP in the experiments with structured latent variables. Here's how to setup it:
 
-** Download [lp-sparsemap](https://github.com/deep-spin/lp-sparsemap)
-```
-git clone https://github.com/deep-spin/lp-sparsemap
-cd lp-sparsemap
-```
-** Install the necessary requirements for lp-sparsemap:
+  - Download [lp-sparsemap](https://github.com/deep-spin/lp-sparsemap)
+  ```
+  git clone https://github.com/deep-spin/lp-sparsemap
+  cd lp-sparsemap
+  ```
 
-*** Cython
-```
-pip install Cython
-```
+  - Install Cython
+  ```
+  pip install Cython
+  ```
 
-*** Eigen
-```
-git clone https://gitlab.com/libeigen/eigen
-export EIGEN_DIR=path/to/eigen
-```
+  - Download Eigen and point to it in your environment
+  ```
+  git clone https://gitlab.com/libeigen/eigen
+  export EIGEN_DIR=path/to/eigen
+  ```
 
-** Activate the environment you are using for your project (if you are using one).
+  - Activate the environment you are using for your project (if you are using one).
 
-** In the lp-sparsemap folder execute the following commands:
+  - In the lp-sparsemap folder execute the following commands:
 
-```
-python setup.py build_clib
-pip install -e .
-```
+  ```
+  python setup.py build_clib
+  pip install -e .
+  ```
 
-** The setup should work.
-
+  - The setup should work. If it doesn't, don't hesitate to ask us. 
 
 ## Organization of the code
 
