@@ -7,6 +7,8 @@ https://www.aclweb.org/anthology/2020.emnlp-main.171/
 
 * The file **requirements.txt** contains required libraries.
 
+* You also need to install [pytorch](https://pytorch.org/).
+
 * We use [pytorch-struct](https://github.com/harvardnlp/pytorch-struct) for the experiments with structured latent variables.
 
 * We use SparseMAP in the experiments with structured latent variables. *Instructions how to install the necessary dependencies will be added soon.*

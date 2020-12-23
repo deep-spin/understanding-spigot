@@ -2,3 +2,4 @@ matplotlib
 entmax
 pyyaml
 sklearn
+torchtext
