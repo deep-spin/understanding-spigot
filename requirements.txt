@@ -3,3 +3,4 @@ entmax
 pyyaml
 sklearn
 torchtext
+nltk

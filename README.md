@@ -11,7 +11,37 @@ https://www.aclweb.org/anthology/2020.emnlp-main.171/
 
 * We use [pytorch-struct](https://github.com/harvardnlp/pytorch-struct) for the experiments with structured latent variables.
 
-* We use SparseMAP in the experiments with structured latent variables. *Instructions how to install the necessary dependencies will be added soon.*
+* We use SparseMAP in the experiments with structured latent variables. 
+*Instructions how to install the necessary dependencies will be added soon.*
+
+** Download [lp-sparsemap](https://github.com/deep-spin/lp-sparsemap)
+```
+git clone https://github.com/deep-spin/lp-sparsemap
+cd lp-sparsemap
+```
+** Install the necessary requirements for lp-sparsemap:
+
+*** Cython
+```
+pip install Cython
+```
+
+*** Eigen
+```
+git clone https://gitlab.com/libeigen/eigen
+export EIGEN_DIR=path/to/eigen
+```
+
+** Activate the environment you are using for your project (if you are using one).
+
+** In the lp-sparsemap folder execute the following commands:
+
+```
+python setup.py build_clib
+pip install -e .
+```
+
+** The setup should work.
 
 
 ## Organization of the code
