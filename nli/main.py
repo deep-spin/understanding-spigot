@@ -7,6 +7,8 @@ from filtered_snli import FilteredSNLI, max_sent_length
 from models import Decomp
 from helpers import printable_time, write_line_to_file
 
+
+
 toy = False
 epochs = 30
 additional_epochs = 30

@@ -7,6 +7,9 @@ from torchtext.datasets.nli import ParsedTextField, ShiftReduceField
 
 max_sent_length=100
 
+import en_core_web_sm
+nlp = en_core_web_sm.load()
+
 
 # Adapted from here: https://github.com/pytorch/text/blob/master/torchtext/datasets/nli.py
 

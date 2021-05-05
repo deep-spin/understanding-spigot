@@ -1,8 +1,8 @@
 import torch
 
-from torch_struct import NonProjectiveDependencyCRF as DependencyCRF
+from torch_struct import NonProjectiveDependencyCRF
 
-from sparsemap import sparsemap_batched, sparsemap_gradient_batched, argmax_batched
+from sparsemap import sparsemap_batched, argmax_batched
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -63,20 +63,10 @@ def ste_marginals_single(arc_scores):
     return (argmax-marginals).detach() + marginals
 
 
-class SparseMAP(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, arc_scores_p, arc_scores_h):
-        z_p, parsers_p = sparsemap_batched(arc_scores_p)
-        ctx.parsers_p = parsers_p
-        z_h, parsers_h = sparsemap_batched(arc_scores_h)
-        ctx.parsers_h = parsers_h
-        return z_p, z_h
-
-    @staticmethod
-    def backward(ctx, grad_z_p, grad_z_h):
-        grad_scores_p = sparsemap_gradient_batched(grad_z_p, ctx.parsers_p)
-        grad_scores_h = sparsemap_gradient_batched(grad_z_h, ctx.parsers_h)
-        return grad_scores_p, grad_scores_h
+def sparsemap(arc_scores_p, arc_scores_h):
+    z_p = sparsemap_batched(arc_scores_p)
+    z_h = sparsemap_batched(arc_scores_h)
+    return z_p, z_h
 
 
 class STEIdentity(torch.autograd.Function):
@@ -219,7 +209,7 @@ class SPIGOTEGArgmax(torch.autograd.Function):
         return grad_s_p, grad_s_h, None, None, None, None, None, None, None
 
 def parse_marginals(scores):
-    return DependencyCRF(scores).marginals
+    return NonProjectiveDependencyCRF(scores).marginals
 
 
 def parse_argmax(scores):
@@ -228,7 +218,6 @@ def parse_argmax(scores):
 
 ste_identity = STEIdentity.apply
 spigot = SPIGOT.apply
-sparsemap = SparseMAP.apply
 spigot_ce_argmax = SPIGOTCEArgmax.apply
 spigot_eg_argmax = SPIGOTEGArgmax.apply
 

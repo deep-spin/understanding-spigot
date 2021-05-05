@@ -1,43 +1,56 @@
 import torch
-import numpy as np
 
-from lpsmap.ad3ext.parse import Parse
+from lpsmap import TorchFactorGraph, DepTree
 
 from torch_struct import NonProjectiveDependencyCRF
 
-from sparsemap import sparsemap_batched, sparsemap_gradient_batched, argmax_batched, argmax_nonproj
+from sparsemap import sparsemap_batched, argmax_batched, argmax_nonproj
 
 
 def test_sparsemap():
-    print('TODO...')
+    print('----------------------------')
+    print('TEST test_sparsemap')
     n = 4
-    temp = 100
 
-    arc_scores = np.random.random((n, n))
+    arc_scores = torch.randn(n, n, requires_grad=True)
 
     # pytorch-struct parser:
-    arc_scores_torch = torch.tensor(arc_scores).unsqueeze(0)
-    print(arc_scores_torch.shape)
+    # arc_scores_torch = torch.tensor(arc_scores).unsqueeze(0)
+    print(arc_scores.shape)
     # pystruct_marginals = NonProjectiveDependencyCRF(arc_scores_torch).marginals
-    pystruct_argmax = NonProjectiveDependencyCRF(arc_scores_torch*temp).marginals
+    pystruct_marg = NonProjectiveDependencyCRF(arc_scores.unsqueeze(0), multiroot=True).marginals
+    print('torch-struct marginals:')
+    print(pystruct_marg)
 
-    print('torch-struct:')
-    # print('marginals:', pystruct_marginals)
-    print(pystruct_argmax.numpy())
+    pystruct_map = NonProjectiveDependencyCRF(arc_scores.unsqueeze(0)*100, multiroot=True).marginals
+    print('torch-struct MAP:')
+    print(pystruct_map)
 
-    parser = Parse(projective=False, packed=True, length=arc_scores.shape[0])
-    marg_u = np.empty_like(arc_scores)
-    max_tree = np.empty_like(arc_scores)
+    # SparseMAP marginals
+    fg = TorchFactorGraph()
+    u = fg.variable_from(arc_scores.transpose(0,1).clone())
+    fg.add(DepTree(u, packed=True, projective=False))
+    fg.solve(max_iter=1, max_inner_iter=50, step_size=0)
+    marg_u = u.value.transpose(0,1)
+
+    # MAP
+    fg = TorchFactorGraph()
+    u = fg.variable_from(arc_scores.transpose(0,1).clone())
+    fg.add(DepTree(u, packed=True, projective=False))
+    fg.solve_map()
+    max_tree = u.value.transpose(0,1)
+
 
     print("SparseMAP Maximizing")
-    max_tree_score = parser.max(arc_scores.ravel('F'), max_tree.ravel())
-    print(max_tree.T)
+    print(max_tree)
 
     print('From method:')
     print(argmax_nonproj(arc_scores))
 
 
 def test_sparsemap_batched():
+    print('----------------------------')
+    print('TEST test_sparsemap_batched')
     b = 3
     n = 4
     temp = 20
