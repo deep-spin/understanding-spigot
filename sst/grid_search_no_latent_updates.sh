@@ -1,4 +1,4 @@
-for latent_model_type in sparsemap # marginals ste_marginals sparsemap argmax perturb_and_map
+for latent_model_type in marginals ste_marginals sparsemap argmax perturb_and_map
 do      
     for learning_rate in 0.00005
     do
