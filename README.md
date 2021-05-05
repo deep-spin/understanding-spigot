@@ -11,9 +11,14 @@ https://www.aclweb.org/anthology/2020.emnlp-main.171/
 pip install -r requirements.txt
 ```
 
-* You also need to install [pytorch](https://pytorch.org/).
+* You also need to install [pytorch](https://pytorch.org/), version 1.4
 
-* We use [pytorch-struct](https://github.com/harvardnlp/pytorch-struct) for the experiments with structured latent variables.
+* We use [pytorch-struct](https://github.com/harvardnlp/pytorch-struct) for the experiments with structured latent variables. Version v0.4 is required. Download the source code for v0.4 from the tags, navigate to the directory and install with: 
+
+  ```
+  pip install -e .
+  ```
+
 
 * We use SparseMAP in the experiments with structured latent variables. Here's how to setup it:
 
@@ -41,6 +46,12 @@ pip install -r requirements.txt
   ```
   python setup.py build_clib
   pip install -e .
+  ```
+
+* Download spacy 
+
+  ```
+  python -m spacy download en_core_web_sm
   ```
 
   - The setup should work. If it doesn't, don't hesitate to ask us. 

@@ -2,5 +2,6 @@ matplotlib
 entmax
 pyyaml
 sklearn
-torchtext
+torchtext==0.4
 nltk
+spacy==2.1

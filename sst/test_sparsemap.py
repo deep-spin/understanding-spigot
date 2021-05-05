@@ -1,67 +1,72 @@
 import torch
 import numpy as np
 
-from lpsmap.ad3ext.parse import Parse
-
+from lpsmap import TorchFactorGraph, DepTree
 from torch_struct import DependencyCRF
 
-from sparsemap import sparsemap_batched, sparsemap_gradient_batched
-
+from sparsemap import sparsemap_batched
 
 def test_sparsemap():
-    print('TODO...')
+    print('TEST test_sparsemap')
     n = 6
-    # arc_scores = np.random.random((n,n))
-    # arc_scores = torch.zeros((3, 3))
+   
+    arc_scores = torch.randn(n, n, requires_grad=True)
 
-    # # 1->* and 2->* are equal
-    # arc_scores[0, 0] += 10
-    # arc_scores[1, 1] += 10
-    # arc_scores[1, 0] += 1  # 2->1
-    # arc_scores[2, 0] += 1  # 3->1
+    with torch.no_grad():
+        torch.autograd.set_detect_anomaly(True)
+        print('Calculate with torch struct')
+        print(arc_scores.shape)
+        dist = DependencyCRF(arc_scores.unsqueeze(0), multiroot=False)
+        pystruct_tree = dist.argmax.detach()[0]
+        print('Torch-struct tree:')
+        print(pystruct_tree)
+        print(pystruct_tree.shape)
+        
+        print('arc_scores before transpose:', arc_scores.shape)
+        arc_scores = arc_scores.transpose(0,1).clone()
+        print('arc_scores transposed:', arc_scores.shape)
 
-    arc_scores = np.random.random((n, n))
+        # exit()
 
-    # sparsemap_tree, sparsemap_tree_score, sparsemap_marginals, sparsemap_trees = test_sparsemap(arc_scores.cpu().numpy())
+        # MAP
+        fg = TorchFactorGraph()
+        v = fg.variable_from(arc_scores)
+        fg.add(DepTree(v, packed=True, projective=True))
+        fg.solve_map()
+        max_tree = v.value.transpose(0,1)
+        print('MAX TREE with solve_map:')
+        print(max_tree)
+        print(max_tree.shape)
 
-    # pytorch-struct parser:
-    arc_scores_torch = torch.tensor(arc_scores).unsqueeze(0)
-    print(arc_scores_torch.shape)
-    dist = DependencyCRF(arc_scores_torch)
-    pystruct_tree = dist.argmax.detach()[0]
+        assert max_tree.allclose(pystruct_tree), "The trees form torch-struct and lp-sparsemap.solve_map do not match"
 
-    # print('SparseMAP tree:')
-    # print(sparsemap_tree)
+        # exit()
 
-    print('torch-struct tree:')
-    print(pystruct_tree)
+        fg = TorchFactorGraph()
+        v = fg.variable_from(arc_scores*100)
+        fg.add(DepTree(v, packed=True, projective=True))
+        fg.solve(max_iter=1, max_inner_iter=50, step_size=0)
+        max_tree = v.value
+        print('MAX TREE 2 with solve(scores*100):')
+        print(max_tree)
+        print(arc_scores.shape)
 
-    parser = Parse(projective=True, packed=True, length=arc_scores.shape[0])
-    marg_u = np.empty_like(arc_scores)
-    max_tree = np.empty_like(arc_scores)
-
-    print("SaprseMAP Maximizing")
-    max_tree_score = parser.max(arc_scores.ravel('F'), max_tree.ravel())
-    print(max_tree.T)
-    exit()
-
-    print()
-    print("SparseMAP-projecting")
-    p = parser.sparsemap(arc_scores.ravel(), marg_u.ravel(), return_active_set=True)
-    print(marg_u)
-    
-    # print(np.dot(scores, marg_u))
-    print()
-    print("SparseMAP-selected trees:")
-    print(p)
-
-    return max_tree.transpose(), max_tree_score, marg_u.transpose(), p
+        # SparseMAP marginals
+        u = fg.variable_from(arc_scores)
+        fg.add(DepTree(u, packed=True, projective=True))
+        fg.solve(max_iter=1, max_inner_iter=50, step_size=0)
+        marg_u = u.value
+        print('SPARSE MARGINALS:')
+        print(marg_u)
+        print('SPARSE MARGINALS grad:')
+        print(marg_u.grad)
 
 
 def test_batched_sparsemap():
+    print('TEST test_batched_sparsemap')
     b = 5
     n = 5
-    arc_scores_batched = torch.rand(b, n, n)
+    arc_scores_batched = torch.rand(b, n, n, requires_grad=True)
 
     sparsemap_proj = sparsemap_batched(arc_scores_batched)
 
@@ -70,14 +75,13 @@ def test_batched_sparsemap():
     print(sparsemap_proj)
 
     print('Testing the grad:')
-    sparsemap_deriv = sparsemap_gradient_batched(arc_scores_batched)
-    print('Sparsemap batched derivative:', sparsemap_deriv.shape)
-    print(sparsemap_deriv)
+    sparsemap_deriv = sparsemap_proj.grad #sparsemap_gradient_batched(arc_scores_batched)
+    print('Sparsemap batched derivative:', sparsemap_deriv)
 
 
 
 if __name__ == '__main__':
-    # test_batched_sparsemap()
+    test_batched_sparsemap()
 
     test_sparsemap()
 

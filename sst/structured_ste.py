@@ -1,5 +1,5 @@
 import torch
-from sparsemap import sparsemap_batched, sparsemap_gradient_batched, argmax_batched
+from sparsemap import sparsemap_batched
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -40,17 +40,8 @@ def ste_marginals(arc_scores):
     return (argmax-marginals).detach() + marginals
 
 
-class SparseMAP(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, arc_scores):
-        z, parsers = sparsemap_batched(arc_scores)
-        ctx.parsers = parsers
-        return z
-
-    @staticmethod
-    def backward(ctx, grad_z):
-        grad_scores = sparsemap_gradient_batched(grad_z, ctx.parsers)
-        return grad_scores
+def sparsemap(arc_scores):
+    return sparsemap_batched(arc_scores)
 
 
 class STEIdentity(torch.autograd.Function):
@@ -241,9 +232,6 @@ def parse_argmax(scores):
 
 ste_identity = STEIdentity.apply
 spigot = SPIGOT.apply
-sparsemap = SparseMAP.apply
-spigot_ce = SPIGOTCE.apply
-spigot_eg = SPIGOTEG.apply
 spigot_ce_argmax = SPIGOTCEArgmax.apply
 spigot_eg_argmax = SPIGOTEGArgmax.apply
 
